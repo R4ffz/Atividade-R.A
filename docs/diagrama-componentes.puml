@@ -1,0 +1,56 @@
+@startuml diagrama-componentes
+title Diagrama de Componentes - API de Contratos e Cobranças
+skinparam componentStyle uml2
+skinparam packageStyle rectangle
+
+actor "Cliente HTTP" as cliente
+
+package "Apresentação (presentation)" #DBEAFE {
+  [Controladores HTTP\n(FastAPI)] as API
+  [Schemas\n(Pydantic)] as SCH
+}
+
+package "Aplicação (application)" #DCFCE7 {
+  [Casos de Uso] as UC
+  [DTOs] as DTO
+  interface "Relogio" as IREL
+}
+
+package "Domínio (domain)" #FEF3C7 {
+  [Entidades\nContrato, Cobranca] as ENT
+  [Regras Financeiras\nCalculadoraEncargos] as REG
+  [Objetos de Valor\nDinheiro, Documento, Competencia] as VO
+  interface "ContratoRepositorio\nCobrancaRepositorio" as IREP
+}
+
+package "Infraestrutura (infrastructure)" #F3E8FF {
+  [Repositórios SQLite] as SQL
+  [Repositórios em Memória] as MEM
+  [RelogioSistema] as REL
+}
+
+[Raiz de Composição\nmain.py] as MAIN
+database "SQLite" as DB
+
+cliente --> API : HTTP/JSON
+API --> SCH
+API --> UC
+API --> DTO
+UC --> DTO
+UC --> ENT
+UC --> IREP
+UC --> IREL
+ENT --> REG
+ENT --> VO
+REG --> VO
+
+SQL ..|> IREP : implementa
+MEM ..|> IREP : implementa
+REL ..|> IREL : implementa
+SQL --> DB
+
+MAIN --> API
+MAIN --> UC
+MAIN --> SQL
+MAIN --> REL
+@enduml
